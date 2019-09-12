@@ -27,6 +27,27 @@ class Home extends Component
         this.fetchItems(endpoint);
     }
 
+    searchItems = (searchTerm) =>
+    {
+        let endpoint=''
+        this.setState(
+            {
+                movies: [],
+                loading: true,
+                searchTerm    //Since both parameter's name are same so we dont need to set searchTerm
+            }
+        )
+
+        if (searchTerm==='') {
+            endpoint =`${API_URL}movie/popular?api_key=${API_KEY}&language=jp-JP&region=JP&Page=1`;
+        }
+        else{
+            endpoint=`${API_URL}search/movie?api_key=${API_KEY}&language=jp-JP&query=${searchTerm}`;
+        }
+
+        this.fetchItems(endpoint);
+    }
+
     fetchItems = (endpoint) =>{
         fetch(endpoint)
         .then(result=>result.json())
@@ -35,12 +56,13 @@ class Home extends Component
                {
                 movies: [...this.state.movies,...result.results],//ES6 spread syntax . It appends old movies data with new results. results are an object of result . Which we are getting from api .
                 heroImage: this.state.heroImage || result.results[0],//This will check herImmage . If heroImage is null it will be replaced by first image.
-                loading: false,
+                loading: false,                                      //heroimage is an json array
                 currentPage: result.page,
                 totalPage: result.total_pages
             } 
            )
         })
+        .catch(error=>console.error('Error: ',error))
     }
 
     loadMore= () =>
@@ -60,8 +82,17 @@ class Home extends Component
     render() {
         return (
              <div className="rmdb-home">
-                 <HeroImage />
-                 <SearchBar />
+                 {this.state.heroImage ?        //Ternery operator checking if heroImage is null or not.
+                    <div>
+                        <HeroImage 
+                            image={`${IMAGE_BASE_URL}${BACKDROP_SIZE}${this.state.heroImage.backdrop_path}`}
+                            title={this.state.heroImage.original_title}
+                            text={this.state.heroImage.overview}
+                        />
+                        <SearchBar />
+
+                    </div>
+                 : null}
                  <FourColGrid />
                  <Spinner />
                  <LoadMoreBtn />
