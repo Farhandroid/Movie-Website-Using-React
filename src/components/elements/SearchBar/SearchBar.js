@@ -10,6 +10,17 @@ class SearchBar extends Component
     state={
         value: ''
     }
+    timeout= null;
+
+    doSearch = (event) =>
+    {
+        this.setState({value: event.target.value}); //After 500ms(not sure) the search will automaticaly called
+        clearTimeout(this.timeout);
+
+        this.timeout= setTimeout( () => {
+            this.props.callback(this.state.value);
+        },500);
+    }
 
     render() {
         return (
